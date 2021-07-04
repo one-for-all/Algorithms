@@ -1,0 +1,5 @@
+Percolation timing
+Percolation space complexity (not using two UF)
+
+Stack with max efficient implementation
+
