@@ -40,7 +40,7 @@ public class FastCollinearPoints {
 
             int i = 0;
             while (i < aux.length) {
-                Point q = points[i];
+                Point q = aux[i];
                 if (p.compareTo(q) >= 0) {
                     // Check maximal line segment
                     i++;
