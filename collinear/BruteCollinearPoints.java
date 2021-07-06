@@ -18,11 +18,13 @@ public class BruteCollinearPoints {
 
         int numPoints = points.length;
 
-        for (int i = 0; i < numPoints; i++) {
-            Point p = points[i];
+        for (Point p : points) {
             if (p == null)
                 throw new IllegalArgumentException();
+        }
 
+        for (int i = 0; i < numPoints; i++) {
+            Point p = points[i];
             // Check repeated points
             for (int j = i + 1; j < numPoints; j++) {
                 if (p.compareTo(points[j]) == 0)
