@@ -32,14 +32,14 @@ public class FastCollinearPoints {
         }
 
         Point[] aux = points.clone();
-        for (Point p : aux) {
+        for (Point p : points) {
             // First sort by compareTo
-            Arrays.sort(points);
+            Arrays.sort(aux);
             // Then sort by slope order to p
-            Arrays.sort(points, p.slopeOrder());
+            Arrays.sort(aux, p.slopeOrder());
 
             int i = 0;
-            while (i < points.length) {
+            while (i < aux.length) {
                 Point q = points[i];
                 if (p.compareTo(q) >= 0) {
                     // Check maximal line segment
@@ -47,7 +47,7 @@ public class FastCollinearPoints {
                     continue;
                 }
                 double slopeToQ = p.slopeTo(q);
-                if (i > 0 && p.slopeTo(points[i - 1]) == slopeToQ) {
+                if (i > 0 && p.slopeTo(aux[i - 1]) == slopeToQ) {
                     // Check not in the middle of line segment
                     i++;
                     continue;
@@ -55,11 +55,11 @@ public class FastCollinearPoints {
 
                 // Check 4 or more points
                 int j = i + 2;
-                while (j < points.length && p.slopeTo(points[j]) == slopeToQ)
+                while (j < aux.length && p.slopeTo(aux[j]) == slopeToQ)
                     j++;
                 if (j - i > 2) {
                     // Found proper line segment!
-                    lineSegments.enqueue(new LineSegment(p, points[j - 1]));
+                    lineSegments.enqueue(new LineSegment(p, aux[j - 1]));
                     i = j;
                 }
                 else
