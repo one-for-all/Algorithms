@@ -3,3 +3,4 @@ Percolation space complexity (not using two UF)
 
 Stack with max efficient implementation
 
+Read chapter 1.2 of book
