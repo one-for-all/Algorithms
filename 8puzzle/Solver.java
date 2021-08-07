@@ -4,11 +4,7 @@
  *  Description:
  **************************************************************************** */
 
-import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.MinPQ;
-import edu.princeton.cs.algs4.Queue;
-import edu.princeton.cs.algs4.Stack;
-import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.*;
 
 import java.util.Comparator;
 
@@ -81,7 +77,7 @@ public class Solver {
         }
     }
 
-    private SearchNode solutionNode = null;
+    private final SearchNode solutionNode;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
@@ -107,6 +103,7 @@ public class Solver {
             // Search twin game tree
             SearchNode twinNode = twinPQ.delMin();
             if (twinNode.isGoal()) {
+                this.solutionNode = null;
                 break; // No solution for original board
             }
             for (SearchNode child : twinNode.children())
