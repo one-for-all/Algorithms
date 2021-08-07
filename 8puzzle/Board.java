@@ -34,6 +34,8 @@ public class Board {
 
     // The goal value at position (i, j)
     private int goalVal(int i, int j) {
+        if (i == n - 1 && j == n - 1)
+            return 0;
         return i * n + j + 1;
     }
 
@@ -50,6 +52,8 @@ public class Board {
     // The goal position (i, j) of the value
     // (inverse function of goalNumber)
     private Position goalPosition(int val) {
+        if (val == 0)
+            return new Position(n - 1, n - 1);
         int i = (val - 1) / n;
         int j = (val - 1) % n;
         return new Position(i, j);
@@ -105,7 +109,7 @@ public class Board {
     // is this board the goal board?
     public boolean isGoal() {
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n - 1; j++) {
+            for (int j = 0; j < n; j++) {
                 if (tiles[i][j] != goalVal(i, j))
                     return false;
             }

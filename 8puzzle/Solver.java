@@ -4,7 +4,11 @@
  *  Description:
  **************************************************************************** */
 
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.StdOut;
 
 import java.util.Comparator;
 
@@ -14,6 +18,7 @@ public class Solver {
         private final int numMoves;
         private final SearchNode prevNode;
         private int hamming = -1;
+        private int manhattan = -1;
 
         public SearchNode(Board cur, int numMoves, SearchNode prevNode) {
             this.board = cur;
@@ -27,6 +32,12 @@ public class Solver {
             return hamming;
         }
 
+        public int manhattanPriority() {
+            if (manhattan == -1)
+                manhattan = numMoves + this.board.manhattan();
+            return manhattan;
+        }
+
         public boolean isGoal() {
             return board.isGoal();
         }
@@ -34,7 +45,7 @@ public class Solver {
         public Iterable<SearchNode> children() {
             Queue<SearchNode> queue = new Queue<>();
             for (Board nei : board.neighbors())
-                if (!nei.equals(prevNode.board))
+                if (prevNode == null || !nei.equals(prevNode.board))
                     queue.enqueue(new SearchNode(nei, numMoves + 1, this));
             return queue;
         }
@@ -58,8 +69,15 @@ public class Solver {
         public int compare(SearchNode a, SearchNode b) {
             if (a == null || b == null)
                 throw new NullPointerException();
-
             return Integer.compare(a.hammingPriority(), b.hammingPriority());
+        }
+    }
+
+    private class ByManhattanPriority implements Comparator<SearchNode> {
+        public int compare(SearchNode a, SearchNode b) {
+            if (a == null || b == null)
+                throw new NullPointerException();
+            return Integer.compare(a.manhattanPriority(), b.manhattanPriority());
         }
     }
 
@@ -70,10 +88,14 @@ public class Solver {
         if (initial == null)
             throw new IllegalArgumentException();
 
-        // A* search from the initial board
-        MinPQ<SearchNode> pq = new MinPQ<>(new ByHammingPriority());
+        // A* search from the initial board & twin board
+        MinPQ<SearchNode> pq = new MinPQ<>(new ByManhattanPriority());
         pq.insert(new SearchNode(initial, 0, null));
-        while (!pq.isEmpty()) {
+
+        MinPQ<SearchNode> twinPQ = new MinPQ<>(new ByManhattanPriority());
+        twinPQ.insert(new SearchNode(initial.twin(), 0, null));
+        while (true) {
+            // Search target game tree
             SearchNode node = pq.delMin();
             if (node.isGoal()) {
                 this.solutionNode = node;
@@ -81,6 +103,14 @@ public class Solver {
             }
             for (SearchNode child : node.children())
                 pq.insert(child);
+
+            // Search twin game tree
+            SearchNode twinNode = twinPQ.delMin();
+            if (twinNode.isGoal()) {
+                break; // No solution for original board
+            }
+            for (SearchNode child : twinNode.children())
+                twinPQ.insert(child);
         }
     }
 
