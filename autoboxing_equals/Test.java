@@ -4,15 +4,15 @@ public class Test {
         double b = -0.0;
         Double x = new Double(a);
         Double y = new Double(b);
-        assert a == b && x != y;
+        assert a == b && !x.equals(y);
     }
 
     private static void case2() {
         double a = Double.NaN;
+        double b = Double.NaN;
         Double x = new Double(a);
-        Double y = x;
-        double b = y;
-        assert a != b && x == y;
+        Double y = new Double(b);
+        assert a != b && x.equals(y);
     }
 
     public static void main(String[] args) {
