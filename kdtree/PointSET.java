@@ -58,7 +58,7 @@ public class PointSET {
         double minDist = -1;
         Point2D nearestPoint = null;
         for (Point2D pCurrent : pointsTree) {
-            double dist = p.distanceTo(pCurrent);
+            double dist = p.distanceSquaredTo(pCurrent);
             if (nearestPoint == null || dist < minDist) {
                 nearestPoint = pCurrent;
                 minDist = dist;
