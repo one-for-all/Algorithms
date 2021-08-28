@@ -186,12 +186,12 @@ public class KdTree {
 
         if (dist2Line >= 0) {
             nearest(x.left, p, pNearest);
-            if (dist2Line <= pNearest[0].distanceTo(p))
+            if (dist2Line < pNearest[0].distanceTo(p))
                 nearest(x.right, p, pNearest);
         }
         else {
             nearest(x.right, p, pNearest);
-            if (-dist2Line <= pNearest[0].distanceTo(p))
+            if (-dist2Line < pNearest[0].distanceTo(p))
                 nearest(x.left, p, pNearest);
         }
     }
