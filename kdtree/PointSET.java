@@ -10,7 +10,7 @@ import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.SET;
 
 public class PointSET {
-    private SET<Point2D> pointsTree = new SET<>();
+    private final SET<Point2D> pointsTree = new SET<>();
 
     private void checkNull(Object thing) {
         if (thing == null)

@@ -11,8 +11,8 @@ import edu.princeton.cs.algs4.StdDraw;
 
 public class KdTree {
     private class Node {
-        private Point2D p;
-        private boolean isVertical;
+        private final Point2D p;
+        private final boolean isVertical;
         private Node left, right;
 
         public Node(Point2D p, boolean isVertical) {
