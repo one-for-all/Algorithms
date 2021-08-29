@@ -54,6 +54,7 @@ public class KdTree {
                 double xmin = rectParent.xmin(), ymin = rectParent.ymin(), xmax = rectParent.xmax(),
                         ymax = rectParent.ymax();
 
+                // Create the proper rectangle
                 if (xParent.isVertical && p.x() <= xParent.p.x())
                     xmax = xParent.p.x();
                 else if (xParent.isVertical)
@@ -70,10 +71,8 @@ public class KdTree {
         if (x.p.equals(p)) return x;
 
         int cmp;
-        if (x.isVertical)
-            cmp = Double.compare(p.x(), x.p.x());
-        else
-            cmp = Double.compare(p.y(), x.p.y());
+        if (x.isVertical) cmp = Double.compare(p.x(), x.p.x());
+        else cmp = Double.compare(p.y(), x.p.y());
 
         if (cmp <= 0) x.left = insert(x.left, p, x);
         else x.right = insert(x.right, p, x);
@@ -92,10 +91,9 @@ public class KdTree {
         if (x.p.equals(p)) return true;
 
         int cmp;
-        if (x.isVertical)
-            cmp = Double.compare(p.x(), x.p.x());
-        else
-            cmp = Double.compare(p.y(), x.p.y());
+        if (x.isVertical) cmp = Double.compare(p.x(), x.p.x());
+        else cmp = Double.compare(p.y(), x.p.y());
+
         if (cmp <= 0) return contains(x.left, p);
         else return contains(x.right, p);
     }
@@ -166,7 +164,7 @@ public class KdTree {
     private void nearest(Node x, Point2D p, Point2D[] pNearest) {
         if (x == null) return;
 
-        if (pNearest[0] == null || x.p.distanceTo(p) < pNearest[0].distanceTo(p))
+        if (pNearest[0] == null || x.p.distanceSquaredTo(p) < pNearest[0].distanceSquaredTo(p))
             pNearest[0] = x.p;
 
         double xmin = x.rect.xmin(), ymin = x.rect.ymin(), xmax = x.rect.xmax(),
@@ -185,16 +183,19 @@ public class KdTree {
             cmp = x.p.y() >= p.y();
         }
 
+        // Heuristic for looking left subtree or right subtree first
         if (cmp) {
-            if (rectLeft.contains(p) || rectLeft.distanceTo(p) < pNearest[0].distanceTo(p))
+            if (rectLeft.contains(p) || rectLeft.distanceSquaredTo(p) < pNearest[0]
+                    .distanceSquaredTo(p))
                 nearest(x.left, p, pNearest);
-            if (rectRight.distanceTo(p) < pNearest[0].distanceTo(p))
+            if (rectRight.distanceSquaredTo(p) < pNearest[0].distanceSquaredTo(p))
                 nearest(x.right, p, pNearest);
         }
         else {
-            if (rectRight.contains(p) || rectRight.distanceTo(p) < pNearest[0].distanceTo(p))
+            if (rectRight.contains(p) || rectRight.distanceSquaredTo(p) < pNearest[0]
+                    .distanceSquaredTo(p))
                 nearest(x.right, p, pNearest);
-            if (rectLeft.distanceTo(p) < pNearest[0].distanceTo(p))
+            if (rectLeft.distanceSquaredTo(p) < pNearest[0].distanceSquaredTo(p))
                 nearest(x.left, p, pNearest);
         }
     }
