@@ -12,11 +12,13 @@ import edu.princeton.cs.algs4.StdDraw;
 public class KdTree {
     private class Node {
         private final Point2D p;
+        private final RectHV rect;
         private final boolean isVertical;
         private Node left, right;
 
-        public Node(Point2D p, boolean isVertical) {
+        public Node(Point2D p, RectHV rect, boolean isVertical) {
             this.p = p;
+            this.rect = rect;
             this.isVertical = isVertical;
         }
     }
@@ -39,13 +41,30 @@ public class KdTree {
 
     public void insert(Point2D p) {
         checkNull(p);
-        root = insert(root, p, true);
+        root = insert(root, p, null);
     }
 
-    private Node insert(Node x, Point2D p, boolean isVertical) {
+    private Node insert(Node x, Point2D p, Node xParent) {
         if (x == null) {
             n++;
-            return new Node(p, isVertical);
+            if (xParent == null)
+                return new Node(p, new RectHV(0, 0, 1, 1), true);
+            else {
+                RectHV rectParent = xParent.rect;
+                double xmin = rectParent.xmin(), ymin = rectParent.ymin(), xmax = rectParent.xmax(),
+                        ymax = rectParent.ymax();
+
+                if (xParent.isVertical && p.x() <= xParent.p.x())
+                    xmax = xParent.p.x();
+                else if (xParent.isVertical)
+                    xmin = xParent.p.x();
+                else if (p.y() <= xParent.p.y())
+                    ymax = xParent.p.y();
+                else
+                    ymin = xParent.p.y();
+
+                return new Node(p, new RectHV(xmin, ymin, xmax, ymax), !xParent.isVertical);
+            }
         }
 
         if (x.p.equals(p)) return x;
@@ -56,8 +75,8 @@ public class KdTree {
         else
             cmp = Double.compare(p.y(), x.p.y());
 
-        if (cmp <= 0) x.left = insert(x.left, p, !x.isVertical);
-        else x.right = insert(x.right, p, !x.isVertical);
+        if (cmp <= 0) x.left = insert(x.left, p, x);
+        else x.right = insert(x.right, p, x);
 
         return x;
     }
@@ -82,12 +101,10 @@ public class KdTree {
     }
 
     public void draw() {
-        Queue<RectHV> verticalLines = new Queue<>();
-        Queue<RectHV> horizontalLines = new Queue<>();
-        draw(root, verticalLines, horizontalLines);
+        draw(root);
     }
 
-    private void draw(Node x, Queue<RectHV> verticalLines, Queue<RectHV> horizontalLines) {
+    private void draw(Node x) {
         if (x == null) return;
 
         // Draw point
@@ -98,48 +115,18 @@ public class KdTree {
         // Draw line
         StdDraw.setPenRadius(0.005);
         if (x.isVertical) {
-            double yBottom = 0;
-            double yTop = 1;
-
-            for (RectHV line : horizontalLines) {
-                if (line.xmin() <= x.p.x() && line.xmax() >= x.p.x()) {
-                    double yLine = line.ymin();
-                    if (yLine <= x.p.y() && yLine > yBottom)
-                        yBottom = yLine;
-                    else if (yLine >= x.p.y() && yLine < yTop)
-                        yTop = yLine;
-                }
-            }
-
             StdDraw.setPenColor(StdDraw.RED);
-
             double pX = x.p.x();
-            StdDraw.line(pX, yBottom, pX, yTop);
-            verticalLines.enqueue(new RectHV(pX, yBottom, pX, yTop));
+            StdDraw.line(pX, x.rect.ymin(), pX, x.rect.ymax());
         }
         else {
-            double xLeft = 0;
-            double xRight = 1;
-
-            for (RectHV line : verticalLines) {
-                if (line.ymin() <= x.p.y() && line.ymax() >= x.p.y()) {
-                    double xLine = line.xmin();
-                    if (xLine <= x.p.x() && xLine > xLeft)
-                        xLeft = xLine;
-                    else if (xLine >= x.p.x() && xLine < xRight)
-                        xRight = xLine;
-                }
-            }
-
             StdDraw.setPenColor(StdDraw.BLUE);
-
             double pY = x.p.y();
-            StdDraw.line(xLeft, pY, xRight, pY);
-            horizontalLines.enqueue(new RectHV(xLeft, pY, xRight, pY));
+            StdDraw.line(x.rect.xmin(), pY, x.rect.xmax(), pY);
         }
 
-        draw(x.left, verticalLines, horizontalLines);
-        draw(x.right, verticalLines, horizontalLines);
+        draw(x.left);
+        draw(x.right);
     }
 
     public Iterable<Point2D> range(RectHV rect) {
@@ -182,16 +169,32 @@ public class KdTree {
         if (pNearest[0] == null || x.p.distanceTo(p) < pNearest[0].distanceTo(p))
             pNearest[0] = x.p;
 
-        double dist2Line = x.isVertical ? x.p.x() - p.x() : x.p.y() - p.y();
+        double xmin = x.rect.xmin(), ymin = x.rect.ymin(), xmax = x.rect.xmax(),
+                ymax = x.rect.ymax();
+        RectHV rectLeft;
+        RectHV rectRight;
+        boolean cmp;
+        if (x.isVertical) {
+            rectLeft = new RectHV(xmin, ymin, x.p.x(), ymax);
+            rectRight = new RectHV(x.p.x(), ymin, xmax, ymax);
+            cmp = x.p.x() >= p.x();
+        }
+        else {
+            rectLeft = new RectHV(xmin, ymin, xmax, x.p.y());
+            rectRight = new RectHV(xmin, x.p.y(), xmax, ymax);
+            cmp = x.p.y() >= p.y();
+        }
 
-        if (dist2Line >= 0) {
-            nearest(x.left, p, pNearest);
-            if (dist2Line < pNearest[0].distanceTo(p))
+        if (cmp) {
+            if (rectLeft.contains(p) || rectLeft.distanceTo(p) < pNearest[0].distanceTo(p))
+                nearest(x.left, p, pNearest);
+            if (rectRight.distanceTo(p) < pNearest[0].distanceTo(p))
                 nearest(x.right, p, pNearest);
         }
         else {
-            nearest(x.right, p, pNearest);
-            if (-dist2Line < pNearest[0].distanceTo(p))
+            if (rectRight.contains(p) || rectRight.distanceTo(p) < pNearest[0].distanceTo(p))
+                nearest(x.right, p, pNearest);
+            if (rectLeft.distanceTo(p) < pNearest[0].distanceTo(p))
                 nearest(x.left, p, pNearest);
         }
     }
