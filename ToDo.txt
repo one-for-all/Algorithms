@@ -5,4 +5,4 @@ Stack with max efficient implementation
 
 Read chapter 1.2 of book
 
-KdTree assignment Q&A & Analysis
+KdTree assignment Analysis
