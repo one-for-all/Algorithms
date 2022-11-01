@@ -5,6 +5,7 @@ def three_sort(a):
     :param a: An array containing 1, 2, or 3.
     :return: a sorted array
     """
+
     def swap(a, i, j):
         """ Swap the values at i and j
         """
@@ -13,7 +14,7 @@ def three_sort(a):
         a[j] = tmp
 
     red = 0
-    blue = len(a)-1
+    blue = len(a) - 1
     cur = 0
     while cur <= blue:
         if a[cur] == 1:
@@ -27,6 +28,7 @@ def three_sort(a):
             blue -= 1
 
     return a
+
 
 if __name__ == "__main__":
     a = [1, 1, 3, 3, 2, 2, 1, 1, 3, 1]
